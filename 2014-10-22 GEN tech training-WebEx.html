@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>2014-10-22 GEN tech training-WebEx</title>
+
+    <style type="text/css">
+        div#videoPlayerBox {
+            width:1008px;
+            background:#000;
+            margin:0px auto;
+        }
+
+        div#videoControlsBar {
+            background:#333;
+            padding:10px;
+            color:#CCC;
+            font-family:"Trebuchet MS";
+        }
+
+        video#myVideo {
+            width:1008px;
+            height:628px;
+        }
+
+        input#videoSlider {
+            width:550px;
+            align-content:center;
+        }
+
+        input#volumeSlider {
+            width:80px;
+            align-content:center;
+        }
+
+        input[type='range'] {
+            -webkit-appearance: none !important;
+            background: #000;
+            border:#666 1px solid;
+            height: 4px;
+        }
+
+        input[type='range']::-webkit-slider-thumb {
+            -webkit-appearance: none !important;
+            background: #FFF;
+            height: 15px;
+            width: 15px;
+            border-radius:100%;
+            cursor:pointer;
+        }
+
+
+
+
+        .timestamp {
+            font-weight:bold;
+            color:black;
+        }
+
+        #playPauseButton {
+            width: 60px;
+        }
+
+        #muteButton {
+            width: 60px;
+        }
+    </style>
+
+    <script>
+        var vid, playPauseButton, videoSlider, currentTimeText, durationTimeText, muteButton, volumeSlider, currentVolume, fullScreenToggleButton;
+
+        var saveVolume;
+
+        function initializePlayer() {
+            currentVolume = 80;
+            saveVolume = currentVolume;
+
+            // Set object references
+            vid = document.getElementById("myVideo");
+            playPauseButton = document.getElementById("playPauseButton");
+            videoSlider = document.getElementById("videoSlider");
+            currentTimeText = document.getElementById("currentTimeText");
+            durationTimeText = document.getElementById("durationTimeText");
+            muteButton = document.getElementById("muteButton");
+            volumeSlider = document.getElementById("volumeSlider");
+            fullScreenToggleButton = document.getElementById("fullScreenToggleButton");
+
+            // Add event listeners
+            playPauseButton.addEventListener("click", playPauseButtonPressed, false);
+            videoSlider.addEventListener("change", videoSliderChanged, false);
+            vid.addEventListener("timeupdate", vidTimeHasChanged, false);
+            vid.addEventListener("play", vidBuiltInControlsPlayButtonPressed, false)
+            vid.addEventListener("pause", vidBuiltInControlsPauseButtonPressed, false)
+            vid.addEventListener("volumechange", vidBuiltInControlsVolumeChanged, false)
+
+            muteButton.addEventListener("click", videoMuteUnmutePressed, false);
+            volumeSlider.addEventListener("change", volumeSliderChanged, false);
+            fullScreenToggleButton.addEventListener("click", fullScreenToggleButtonPressed, false);
+
+            volumeSlider.value = currentVolume;
+        }
+
+        window.onload = initializePlayer;
+
+        function playPauseButtonPressed() {      //  Called when the user presses the Play/Pause button
+            if (vid.paused) {
+                vid.play();
+                playPauseButton.innerHTML = "Pause";
+            } else {
+                vid.pause();
+                playPauseButton.innerHTML = "Play";
+            }
+        }
+
+        function videoSliderChanged() {
+            var seekTo = vid.duration * (videoSlider.value / 100);
+            vid.currentTime = seekTo;
+        }
+
+
+        //  Use when the current time in the playing video changes.   
+        //    This will allow the current time to be changed on the screen and also allow the slider position to 
+        //    be changed to reflect the current time in the video.
+
+        function vidTimeHasChanged() {
+            var newTime = vid.currentTime * (100 / vid.duration);
+            videoSlider.value = newTime;
+
+            var currentMinutes  = Math.floor(vid.currentTime / 60);
+            var currentSeconds  = Math.floor(vid.currentTime - currentMinutes * 60);
+
+            var durationMinutes = Math.floor(vid.duration / 60);
+            var durationSeconds = Math.floor(vid.duration - durationMinutes * 60);
+
+            if (currentSeconds  < 10) { currentSeconds  = "0" + currentSeconds;  }
+            if (durationSeconds < 10) { durationSeconds = "0" + durationSeconds; }
+
+            if (currentMinutes  < 10) { currentMinutes  = "0" + currentMinutes;  }
+            if (durationMinutes < 10) { durationMinutes = "0" + durationMinutes; }
+
+            currentTimeText.innerHTML  = currentMinutes  + ":" + currentSeconds;
+            durationTimeText.innerHTML = durationMinutes + ":" + durationSeconds;
+        }
+
+        function vidBuiltInControlsPlayButtonPressed() {
+            playPauseButton.innerHTML = "Pause";
+        }
+
+        function vidBuiltInControlsPauseButtonPressed() {
+            playPauseButton.innerHTML = "Play";
+        }
+
+        function vidBuiltInControlsVolumeChanged() {
+            volumeSlider.value = vid.volume * 100
+        }
+        
+        function videoMuteUnmutePressed() {
+            if (vid.muted) {
+                vid.muted = false;
+                muteButton.innerHTML = "Mute";
+                volumeSlider.value = saveVolume;
+            } else {
+                vid.muted = true;
+                muteButton.innerHTML = "Unmute";
+                saveVolume = volumeSlider.value;
+                volumeSlider.value = 0;
+            }
+        }
+
+            function volumeSliderChanged() {
+                vid.volume = volumeSlider.value / 100
+            }
+
+            function fullScreenToggleButtonPressed() {
+                if (vid.requestFullScreen) {
+                    vid.requestFullScreen();
+                } else if (vid.webkitRequestFullScreen) {
+                    vid.webkitRequestFullScreen();
+                } else if (vid.mozRequestFullScreen) {
+                    vid.mozRequestFullScreen();
+                }
+            }
+    </script>
+
+</head>
+
+<body>
+    <div id="videoPlayerBox">
+        <video id="myVideo" controls="controls" autoplay>
+          <source src="2014-10-22GENtechtraining-WebEx-A-01.mp4#t=170"/>
+        </video>
+
+        <div id="videoControlsBar">
+            <button id="playPauseButton">Pause</button>
+            <input id="videoSlider" type="range" min="0" max="100" value="0" step="1" />
+            <span id="currentTimeText" class="timestamp"></span> / <span id="durationTimeText" class="timestamp"></span>
+            <button id="muteButton">Mute</button>
+            <input id="volumeSlider" type="range" min="0" max="100" step="1" />
+            <button id="fullScreenToggleButton">[ &nbsp; ]</button>
+        </div>
+    </div>
+</body>
+</html>
